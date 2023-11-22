@@ -44,8 +44,8 @@ type Errors struct {
 	Errors []*Error
 }
 
-func NewErrors() *Errors {
-	return &Errors{}
+func NewErrors(errs ...*Error) *Errors {
+	return new(Errors).Add(errs...)
 }
 
 func (e *Errors) Error() string {
