@@ -29,10 +29,6 @@ var (
 	ReAlphanumeric = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
 
-func Validate(errs ...*Error) error {
-	return NewErrors(errs...).ErrorOrNil()
-}
-
 func NotEmpty[T ~string | ~[]any | ~map[any]any](key string, val T) *Error {
 	if len(val) == 0 {
 		return NewError(key, RuleNotEmpty).WithMessage(MessageNotEmpty)

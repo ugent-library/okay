@@ -2,37 +2,57 @@ package okay
 
 import (
 	"fmt"
-	"strings"
 )
 
-func Add(err error, errs ...error) {
-	vErrs := err.(*Errors)
-	for _, e := range errs {
-		switch vErr := e.(type) {
-		case *Errors:
-			vErrs.errors = append(vErrs.errors, vErr.errors...)
-		case *Error:
-			vErrs.errors = append(vErrs.errors, vErr)
-		default:
-			// TODO panic?
+func Validate(errs ...error) error {
+	e := NewErrors()
+	Add(e, errs...)
+	return e.ErrorOrNil()
+}
+
+func Add(err error, errs ...error) error {
+	if err == nil {
+		err = NewErrors()
+	}
+	e := err.(*Errors)
+	for _, err := range errs {
+		if ee, ok := err.(*Errors); ok {
+			e.Add(ee.Errors...)
+		} else {
+			e.Add(err.(*Error))
 		}
 	}
+	return e
+}
+
+func AddWithPrefix(err error, prefix string, errs ...error) error {
+	if err == nil {
+		err = NewErrors()
+	}
+	e := err.(*Errors)
+	for _, err := range errs {
+		if ee, ok := err.(*Errors); ok {
+			e.AddWithPrefix(prefix, ee.Errors...)
+		} else {
+			e.AddWithPrefix(prefix, err.(*Error))
+		}
+	}
+	return e
 }
 
 type Errors struct {
-	errors []*Error
+	Errors []*Error
 }
 
-func NewErrors(errs ...*Error) *Errors {
-	e := &Errors{}
-	return e.Add(errs...)
+func NewErrors() *Errors {
+	return &Errors{}
 }
 
 func (e *Errors) Error() string {
 	msg := ""
-	for i, err := range e.errors {
+	for i, err := range e.Errors {
 		msg += err.Error()
-		if i < len(e.errors)-1 {
+		if i < len(e.Errors)-1 {
 			msg += ", "
 		}
 	}
@@ -42,7 +62,7 @@ func (e *Errors) Error() string {
 func (e *Errors) Add(errs ...*Error) *Errors {
 	for _, err := range errs {
 		if err != nil {
-			e.errors = append(e.errors, err)
+			e.Errors = append(e.Errors, err)
 		}
 	}
 	return e
@@ -51,93 +71,69 @@ func (e *Errors) Add(errs ...*Error) *Errors {
 func (e *Errors) AddWithPrefix(prefix string, errs ...*Error) *Errors {
 	for _, err := range errs {
 		if err != nil {
-			err.key = prefix + err.key
-			e.errors = append(e.errors, err)
+			e.Errors = append(e.Errors, &Error{
+				Key:     prefix + err.Key,
+				Rule:    err.Rule,
+				Params:  err.Params,
+				Message: err.Message,
+			})
 		}
 	}
 	return e
 }
 
 func (e *Errors) Get(key string) *Error {
-	for _, e := range e.errors {
-		if e.key == key {
+	for _, e := range e.Errors {
+		if e.Key == key {
 			return e
 		}
 	}
 	return nil
 }
 
-func (e *Errors) WithPrefix(prefix string) *Errors {
-	ee := &Errors{}
-
-	for _, err := range e.errors {
-		if strings.HasPrefix(err.key, prefix) {
-			ee.errors = append(ee.errors, err)
-		}
-	}
-
-	return ee
-}
-
 func (e *Errors) ErrorOrNil() error {
-	if len(e.errors) > 0 {
+	if len(e.Errors) > 0 {
 		return e
 	}
 	return nil
 }
 
 type Error struct {
-	key    string
-	rule   string
-	params []any
-	msg    string
+	Key     string
+	Rule    string
+	Params  []any
+	Message string
 }
 
 func NewError(key, rule string, params ...any) *Error {
 	return &Error{
-		key:    key,
-		rule:   rule,
-		params: params,
+		Key:    key,
+		Rule:   rule,
+		Params: params,
 	}
-}
-
-func (e *Error) Key() string {
-	return e.key
-}
-
-func (e *Error) Rule() string {
-	return e.rule
-}
-
-func (e *Error) Params() []any {
-	return e.params
-}
-
-func (e *Error) Message() string {
-	return e.msg
 }
 
 func (e *Error) WithMessage(msg string) *Error {
 	if e != nil {
-		e.msg = msg
+		e.Message = msg
 	}
 	return e
 }
 
 func (e *Error) Error() string {
-	msg := e.key
+	msg := e.Key
 	if msg != "" {
 		msg += " "
 	}
-	if e.msg != "" {
-		msg += e.msg
-	} else if e.rule != "" {
-		msg += e.rule
-		if len(e.params) > 0 {
+	if e.Message != "" {
+		msg += e.Message
+	} else if e.Rule != "" {
+		msg += e.Rule
+		if len(e.Params) > 0 {
 			msg += "["
-			for i, p := range e.params {
+			for i, p := range e.Params {
 				msg += fmt.Sprintf("%v", p)
-				if i < len(e.params)-1 {
+				if i < len(e.Params)-1 {
 					msg += ", "
 				}
 			}
