@@ -22,7 +22,7 @@ func Add(err error, errs ...error) error {
 			e.Add(err.(*Error))
 		}
 	}
-	return e
+	return e.ErrorOrNil()
 }
 
 func AddWithPrefix(err error, prefix string, errs ...error) error {
@@ -37,7 +37,7 @@ func AddWithPrefix(err error, prefix string, errs ...error) error {
 			e.AddWithPrefix(prefix, err.(*Error))
 		}
 	}
-	return e
+	return e.ErrorOrNil()
 }
 
 type Errors struct {
