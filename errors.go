@@ -16,7 +16,9 @@ func Add(err error, errs ...error) error {
 	}
 	e := err.(*Errors)
 	for _, err := range errs {
-		if ee, ok := err.(*Errors); ok {
+		if err == nil {
+			continue
+		} else if ee, ok := err.(*Errors); ok {
 			e.Add(ee.Errors...)
 		} else {
 			e.Add(err.(*Error))
@@ -31,7 +33,9 @@ func Add(err error, errs ...error) error {
 // 	}
 // 	e := err.(*Errors)
 // 	for _, err := range errs {
-// 		if ee, ok := err.(*Errors); ok {
+// 		if err == nil {
+// 			continue
+// 		} else if ee, ok := err.(*Errors); ok {
 // 			e.AddWithPrefix(prefix, ee.Errors...)
 // 		} else {
 // 			e.AddWithPrefix(prefix, err.(*Error))
