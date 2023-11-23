@@ -25,20 +25,20 @@ func Add(err error, errs ...error) error {
 	return e.ErrorOrNil()
 }
 
-func AddWithPrefix(err error, prefix string, errs ...error) error {
-	if err == nil {
-		err = NewErrors()
-	}
-	e := err.(*Errors)
-	for _, err := range errs {
-		if ee, ok := err.(*Errors); ok {
-			e.AddWithPrefix(prefix, ee.Errors...)
-		} else {
-			e.AddWithPrefix(prefix, err.(*Error))
-		}
-	}
-	return e.ErrorOrNil()
-}
+// func AddWithPrefix(err error, prefix string, errs ...error) error {
+// 	if err == nil {
+// 		err = NewErrors()
+// 	}
+// 	e := err.(*Errors)
+// 	for _, err := range errs {
+// 		if ee, ok := err.(*Errors); ok {
+// 			e.AddWithPrefix(prefix, ee.Errors...)
+// 		} else {
+// 			e.AddWithPrefix(prefix, err.(*Error))
+// 		}
+// 	}
+// 	return e.ErrorOrNil()
+// }
 
 type Errors struct {
 	Errors []*Error
@@ -68,19 +68,19 @@ func (e *Errors) Add(errs ...*Error) *Errors {
 	return e
 }
 
-func (e *Errors) AddWithPrefix(prefix string, errs ...*Error) *Errors {
-	for _, err := range errs {
-		if err != nil {
-			e.Errors = append(e.Errors, &Error{
-				Key:     prefix + err.Key,
-				Rule:    err.Rule,
-				Params:  err.Params,
-				Message: err.Message,
-			})
-		}
-	}
-	return e
-}
+// func (e *Errors) AddWithPrefix(prefix string, errs ...*Error) *Errors {
+// 	for _, err := range errs {
+// 		if err != nil {
+// 			e.Errors = append(e.Errors, &Error{
+// 				Key:     prefix + err.Key,
+// 				Rule:    err.Rule,
+// 				Params:  err.Params,
+// 				Message: err.Message,
+// 			})
+// 		}
+// 	}
+// 	return e
+// }
 
 func (e *Errors) Get(key string) *Error {
 	for _, e := range e.Errors {
