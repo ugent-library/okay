@@ -6,14 +6,14 @@ import (
 )
 
 const (
-	RuleNotEmpty     = "not_empty"
-	RuleLength       = "length"
-	RuleLengthIn     = "length_in"
-	RuleMin          = "min"
-	RuleMax          = "max"
-	RuleMatch        = "match"
-	RuleAlphanumeric = "alphanumeric"
-	RuleUnique       = "unique"
+	RuleNotEmpty      = "not_empty"
+	RuleLength        = "length"
+	RuleLengthBetween = "length_between"
+	RuleMin           = "min"
+	RuleMax           = "max"
+	RuleMatch         = "match"
+	RuleAlphanumeric  = "alphanumeric"
+	RuleUnique        = "unique"
 )
 
 var (
@@ -43,9 +43,9 @@ func Length[T ~string | ~[]any | ~map[any]any](key string, val T, n int) *Error 
 	return nil
 }
 
-func LengthIn[T ~string | ~[]any | ~map[any]any](key string, val T, min, max int) *Error {
+func LengthBetween[T ~string | ~[]any | ~map[any]any](key string, val T, min, max int) *Error {
 	if len(val) < min || len(val) > max {
-		return NewError(key, RuleLengthIn, min, max).WithMessage(fmt.Sprintf(MessageLengthIn, min, max))
+		return NewError(key, RuleLengthBetween, min, max).WithMessage(fmt.Sprintf(MessageLengthIn, min, max))
 	}
 	return nil
 }
