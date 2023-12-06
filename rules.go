@@ -29,6 +29,9 @@ var (
 	ReAlphanumeric = regexp.MustCompile("^[a-zA-Z0-9]+$")
 )
 
+// NotEmpty checks if the given string, slice or map is not empty.
+//
+//	err := okay.NotEmpty("keywords", []string{"childcare"})
 func NotEmpty[T ~string | ~[]any | ~map[any]any](key string, val T) *Error {
 	if len(val) == 0 {
 		return NewError(key, RuleNotEmpty).WithMessage(MessageNotEmpty)
@@ -36,6 +39,9 @@ func NotEmpty[T ~string | ~[]any | ~map[any]any](key string, val T) *Error {
 	return nil
 }
 
+// Length checks if the given string, slice or map has a given length.
+//
+//	err := okay.Length("keywords", []string{"childcare"}, 1)
 func Length[T ~string | ~[]any | ~map[any]any](key string, val T, n int) *Error {
 	if len(val) != n {
 		return NewError(key, RuleLength, n).WithMessage(fmt.Sprintf(MessageLength, n))
@@ -43,6 +49,10 @@ func Length[T ~string | ~[]any | ~map[any]any](key string, val T, n int) *Error 
 	return nil
 }
 
+// LengthBetween checks if the given string, slice or map has a length that is
+// greater than or equal to min and less than or equal to max.
+//
+//	err := okay.Length("keywords", []string{"childcare"}, 0, 10)
 func LengthBetween[T ~string | ~[]any | ~map[any]any](key string, val T, min, max int) *Error {
 	if len(val) < min || len(val) > max {
 		return NewError(key, RuleLengthBetween, min, max).WithMessage(fmt.Sprintf(MessageLengthIn, min, max))
@@ -50,6 +60,10 @@ func LengthBetween[T ~string | ~[]any | ~map[any]any](key string, val T, min, ma
 	return nil
 }
 
+// Min checks if the given string, slice or map has a length that is
+// greater than or equal to min.
+//
+//	err := okay.Min("keywords", []string{"childcare", "education"}, 1)
 func Min[T int | int64 | float64](key string, val T, min T) *Error {
 	if val < min {
 		return NewError(key, RuleMin, min).WithMessage(fmt.Sprintf(MessageMin, min))
@@ -57,6 +71,10 @@ func Min[T int | int64 | float64](key string, val T, min T) *Error {
 	return nil
 }
 
+// Max checks if the given string, slice or map has a length that is
+// less than or equal to max.
+//
+//	err := okay.Max("keywords", []string{"childcare"}, 10)
 func Max[T int | int64 | float64](key string, val T, max T) *Error {
 	if val > max {
 		return NewError(key, RuleMax, max).WithMessage(fmt.Sprintf(MessageMax, max))
@@ -64,6 +82,9 @@ func Max[T int | int64 | float64](key string, val T, max T) *Error {
 	return nil
 }
 
+// Match checks if the given string matches a regular expression.
+//
+//	err := okay.Match("issn", "1940-5758", regexp.MustCompile(`^[0-9]{4}-[0-9]{3}[0-9X]$`))
 func Match(key, val string, r *regexp.Regexp) *Error {
 	if !r.MatchString(val) {
 		return NewError(key, RuleMatch, r).WithMessage(fmt.Sprintf(MessageMatch, r))
@@ -71,6 +92,9 @@ func Match(key, val string, r *regexp.Regexp) *Error {
 	return nil
 }
 
+// Alphanumeric checks if a given string only contains letters a to z, letters A to Z or digits.
+//
+//	err := okay.Match("issn", "1940-5758", regexp.MustCompile(`^[0-9]{4}-[0-9]{3}[0-9X]$`))
 func Alphanumeric(key, val string) *Error {
 	if !ReAlphanumeric.MatchString(val) {
 		return NewError(key, RuleAlphanumeric).WithMessage(MessageAlphanumeric)
@@ -78,6 +102,7 @@ func Alphanumeric(key, val string) *Error {
 	return nil
 }
 
+// ErrNotUnique is a convenience function to signal that a given key fails a uniqueness test.
 func ErrNotUnique(key string) *Error {
 	return NewError(key, RuleUnique).WithMessage(MessageUnique)
 }
