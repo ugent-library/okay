@@ -4,12 +4,22 @@ import (
 	"fmt"
 )
 
+// Add is a convenience function to create an Errors and add zero or more validation errors.
+// Returns nil if there are no errors.
 func Validate(errs ...error) error {
 	e := NewErrors()
 	Add(e, errs...)
 	return e.ErrorOrNil()
 }
 
+// Add is a convenience function to add zero or more validation errors to an
+// Errors.
+//
+// If err is nil, a new Errors wil be created and returned. If the given validation
+// error is an Errors, it's validation errors will be added to err.
+//
+// If err is not an Errors or the given validation errors are not an Errors or
+// an Error, the function will panic.
 func Add(err error, errs ...error) error {
 	if err == nil {
 		err = NewErrors()
@@ -48,10 +58,12 @@ type Errors struct {
 	Errors []*Error
 }
 
+// NewErrors constructs a new Errors with the given validation errors.
 func NewErrors(errs ...*Error) *Errors {
 	return new(Errors).Add(errs...)
 }
 
+// Error returns a string representation of an Errors.
 func (e *Errors) Error() string {
 	msg := ""
 	for i, err := range e.Errors {
@@ -63,6 +75,7 @@ func (e *Errors) Error() string {
 	return msg
 }
 
+// Add zero or more validation errors.
 func (e *Errors) Add(errs ...*Error) *Errors {
 	for _, err := range errs {
 		if err != nil {
@@ -111,6 +124,9 @@ type Error struct {
 	Message string
 }
 
+// NewError constructs a new validation error. key represents the field or value
+// that failed validation. There are no assumptions about the nature of this
+// key, it could be a JSON pointer or the name of a (nested) form field.
 func NewError(key, rule string, params ...any) *Error {
 	return &Error{
 		Key:    key,
@@ -119,6 +135,7 @@ func NewError(key, rule string, params ...any) *Error {
 	}
 }
 
+// WithMessage sets a custom error message if the validation error is not nil.
 func (e *Error) WithMessage(msg string) *Error {
 	if e != nil {
 		e.Message = msg
@@ -126,6 +143,7 @@ func (e *Error) WithMessage(msg string) *Error {
 	return e
 }
 
+// Error returns a string representation of the validation error.
 func (e *Error) Error() string {
 	msg := e.Key
 	if msg != "" {
