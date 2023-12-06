@@ -86,6 +86,7 @@ func (e *Errors) Add(errs ...*Error) *Errors {
 // 	return e
 // }
 
+// Get fetches an Error by key or return nil if the key is not found.
 func (e *Errors) Get(key string) *Error {
 	for _, e := range e.Errors {
 		if e.Key == key {
@@ -95,6 +96,7 @@ func (e *Errors) Get(key string) *Error {
 	return nil
 }
 
+// ErrorOrNil returns Errors as a (nil) error interface value.
 func (e *Errors) ErrorOrNil() error {
 	if len(e.Errors) > 0 {
 		return e
